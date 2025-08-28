@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LockClosedIcon, ShieldCheckIcon, UserIcon } from '@heroicons/react/24/outline';
+import { useTheme } from '../contexts/ThemeContext';
+import { LockClosedIcon, ShieldCheckIcon, UserIcon, SparklesIcon, HeartIcon } from '@heroicons/react/24/outline';
+import ThemeToggle from './ThemeToggle';
 
 const LoginPage: React.FC = () => {
   const { currentUser, signInWithGoogle, signInWithGithub, signInWithMicrosoft, signInAnonymously } = useAuth();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   // Redirect to chat if user is already authenticated
   useEffect(() => {
@@ -14,6 +18,11 @@ const LoginPage: React.FC = () => {
       navigate('/chat');
     }
   }, [currentUser, navigate]);
+
+  // Animation on mount
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
 
   const handleSignIn = async (provider: string, signInFunction: () => Promise<void>) => {
     setIsLoading(provider);
@@ -43,56 +52,112 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-            <ShieldCheckIcon className="h-8 w-8 text-white" />
-          </div>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Welcome to Manoday
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Your confidential mental wellness companion
-          </p>
-          <div className="mt-4 flex items-center justify-center space-x-2 text-xs text-gray-500">
-            <LockClosedIcon className="h-4 w-4" />
-            <span>100% Private & Secure</span>
-          </div>
-        </div>
+    <div className={`min-h-screen relative overflow-hidden transition-colors duration-300 ${
+      isDark 
+        ? 'bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900' 
+        : 'bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50'
+    }`}>
+      {/* Theme Toggle - Top Right */}
+      <div className="absolute top-6 right-6 z-20">
+        <ThemeToggle />
+      </div>
 
-        <div className="mt-8 space-y-4">
-          <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-100">
-            <div className="space-y-4">
-              {/* Anonymous Login Option */}
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className={`absolute -top-40 -right-40 w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob ${
+          isDark ? 'bg-purple-600' : 'bg-purple-300'
+        }`}></div>
+        <div className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob ${
+          isDark ? 'bg-indigo-600' : 'bg-yellow-300'
+        }`} style={{ animationDelay: '2s' }}></div>
+        <div className={`absolute top-40 left-40 w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob ${
+          isDark ? 'bg-pink-600' : 'bg-pink-300'
+        }`} style={{ animationDelay: '4s' }}></div>
+      </div>
+
+      {/* Main content */}
+      <div className="relative z-10 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className={`max-w-md w-full space-y-8 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          
+          {/* Header */}
+          <div className="text-center">
+            <div className="mx-auto h-20 w-20 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl transform hover:scale-105 transition-transform duration-300">
+              <HeartIcon className="h-10 w-10 text-white" />
+            </div>
+            <h1 className="mt-8 text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent">
+              Manoday
+            </h1>
+            <p className={`mt-3 text-lg font-medium transition-colors duration-300 ${
+              isDark ? 'text-gray-200' : 'text-gray-600'
+            }`}>
+              Your mental wellness companion
+            </p>
+            <div className={`mt-4 flex items-center justify-center space-x-2 text-sm transition-colors duration-300 ${
+              isDark ? 'text-gray-400' : 'text-gray-500'
+            }`}>
+              <SparklesIcon className="h-4 w-4 text-purple-500" />
+              <span>AI-Powered • Private • Secure</span>
+            </div>
+          </div>
+
+          {/* Login Options */}
+          <div className="space-y-6">
+            {/* Anonymous Login */}
+            <div className={`backdrop-blur-sm rounded-2xl shadow-xl border transition-colors duration-300 ${
+              isDark 
+                ? 'bg-gray-800/80 border-gray-700/50' 
+                : 'bg-white/80 border-white/20'
+            }`}>
               <button
                 onClick={handleAnonymousSignIn}
                 disabled={isLoading !== null}
-                className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className={`w-full group relative flex items-center justify-center px-6 py-4 rounded-xl shadow-sm text-sm font-semibold transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  isDark
+                    ? 'bg-gradient-to-r from-gray-700 to-gray-600 border border-gray-600 text-gray-200 hover:from-gray-600 hover:to-gray-500 focus:ring-purple-500'
+                    : 'bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 text-gray-700 hover:from-gray-100 hover:to-gray-200 focus:ring-purple-500'
+                }`}
               >
                 {isLoading === 'Anonymous' ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600"></div>
                 ) : (
                   <>
-                    <UserIcon className="w-5 h-5 mr-3" />
-                    Continue Anonymously (No Account)
+                    <UserIcon className="w-5 h-5 mr-3 text-purple-600" />
+                    Continue Anonymously
+                    <span className="ml-2 text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">No Account</span>
                   </>
                 )}
               </button>
+            </div>
 
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
-                </div>
+            {/* Divider */}
+            <div className="relative">
+              <div className={`absolute inset-0 flex items-center ${
+                isDark ? 'border-gray-600' : 'border-gray-300/50'
+              }`}>
+                <div className={`w-full border-t transition-colors duration-300 ${
+                  isDark ? 'border-gray-600' : 'border-gray-300/50'
+                }`} />
               </div>
+              <div className="relative flex justify-center text-sm">
+                <span className={`px-4 font-medium transition-colors duration-300 ${
+                  isDark 
+                    ? 'bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-gray-400' 
+                    : 'bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 text-gray-500'
+                }`}>Or continue with</span>
+              </div>
+            </div>
 
+            {/* OAuth Options */}
+            <div className="space-y-4">
+              {/* Google */}
               <button
                 onClick={() => handleSignIn('Google', signInWithGoogle)}
                 disabled={isLoading !== null}
-                className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className={`w-full group relative flex items-center justify-center px-6 py-4 border rounded-xl shadow-sm text-sm font-semibold transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  isDark
+                    ? 'bg-gray-800 border-gray-700 text-gray-200 hover:bg-gray-700 focus:ring-blue-500'
+                    : 'bg-white border-gray-200 text-gray-700 hover:shadow-md focus:ring-blue-500'
+                }`}
               >
                 {isLoading === 'Google' ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
@@ -109,13 +174,14 @@ const LoginPage: React.FC = () => {
                 )}
               </button>
 
+              {/* GitHub */}
               <button
                 onClick={() => handleSignIn('GitHub', signInWithGithub)}
                 disabled={isLoading !== null}
-                className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full group relative flex items-center justify-center px-6 py-4 bg-gray-900 border border-gray-800 rounded-xl shadow-sm text-sm font-semibold text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02]"
               >
                 {isLoading === 'GitHub' ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-300"></div>
                 ) : (
                   <>
                     <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24">
@@ -126,13 +192,14 @@ const LoginPage: React.FC = () => {
                 )}
               </button>
 
+              {/* Microsoft */}
               <button
                 onClick={() => handleSignIn('Microsoft', signInWithMicrosoft)}
                 disabled={isLoading !== null}
-                className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full group relative flex items-center justify-center px-6 py-4 bg-blue-600 border border-blue-700 rounded-xl shadow-sm text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02]"
               >
                 {isLoading === 'Microsoft' ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                 ) : (
                   <>
                     <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
@@ -147,26 +214,46 @@ const LoginPage: React.FC = () => {
               </button>
             </div>
 
-            <div className="mt-6 text-center">
-              <p className="text-xs text-gray-500">
+            {/* Privacy Notice */}
+            <div className="text-center">
+              <p className={`text-xs transition-colors duration-300 ${
+                isDark ? 'text-gray-400' : 'text-gray-500'
+              }`}>
                 By continuing, you agree to our{' '}
-                <button className="text-blue-600 hover:text-blue-500 bg-transparent border-none p-0 underline">Privacy Policy</button>
+                <button className="text-purple-600 hover:text-purple-500 bg-transparent border-none p-0 underline font-medium">Privacy Policy</button>
                 {' '}and{' '}
-                <button className="text-blue-600 hover:text-blue-500 bg-transparent border-none p-0 underline">Terms of Service</button>
+                <button className="text-purple-600 hover:text-purple-500 bg-transparent border-none p-0 underline font-medium">Terms of Service</button>
               </p>
             </div>
           </div>
 
-          <div className="text-center">
-            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-              <h3 className="text-sm font-medium text-blue-800 mb-2">
-                🔒 Your Privacy Matters
-              </h3>
-              <p className="text-xs text-blue-700">
-                <strong>Anonymous Mode:</strong> No personal information required. Chat confidentially without revealing your identity.
-                <br /><br />
-                <strong>OAuth Mode:</strong> We use industry-standard OAuth2 authentication. Your personal information is never stored on our servers. All conversations are encrypted and anonymous.
-              </p>
+          {/* Features Highlight */}
+          <div className={`backdrop-blur-sm rounded-2xl shadow-lg border transition-colors duration-300 ${
+            isDark 
+              ? 'bg-gray-800/60 border-gray-700/20' 
+              : 'bg-white/60 border-white/20'
+          }`}>
+            <h3 className={`text-sm font-semibold mb-3 flex items-center transition-colors duration-300 ${
+              isDark ? 'text-gray-200' : 'text-gray-800'
+            }`}>
+              <ShieldCheckIcon className="h-4 w-4 mr-2 text-green-500" />
+              Your Privacy is Protected
+            </h3>
+            <div className={`space-y-2 text-xs transition-colors duration-300 ${
+              isDark ? 'text-gray-400' : 'text-gray-600'
+            }`}>
+              <div className="flex items-center">
+                <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                <span><strong>Anonymous Mode:</strong> Chat confidentially without revealing your identity</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
+                <span><strong>OAuth Mode:</strong> Industry-standard authentication with encrypted conversations</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-2 h-2 bg-purple-400 rounded-full mr-2"></div>
+                <span><strong>AI-Powered:</strong> Personalized support using advanced AI technology</span>
+              </div>
             </div>
           </div>
         </div>

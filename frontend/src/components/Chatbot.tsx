@@ -1,6 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { PaperAirplaneIcon, LightBulbIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { useTheme } from '../contexts/ThemeContext';
+import { 
+  PaperAirplaneIcon, 
+  LightBulbIcon, 
+  HeartIcon, 
+  SparklesIcon,
+  UserIcon,
+  ChatBubbleLeftRightIcon,
+  ShieldCheckIcon,
+  ArrowRightIcon,
+  XMarkIcon
+} from '@heroicons/react/24/outline';
+import ThemeToggle from './ThemeToggle';
 
 // Define message structure
 interface Message {
@@ -31,11 +43,13 @@ interface WellnessData {
 
 const Chatbot: React.FC = () => {
   const { currentUser, logout } = useAuth();
+  const { isDark } = useTheme();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [wellnessData, setWellnessData] = useState<Partial<WellnessData>>({});
   const [conversationHistory, setConversationHistory] = useState<string[]>([]);
+  const [showWellnessPanel, setShowWellnessPanel] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom
@@ -341,164 +355,292 @@ const Chatbot: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className={`min-h-screen transition-colors duration-300 ${
+      isDark 
+        ? 'bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900' 
+        : 'bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50'
+    }`}>
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="h-10 w-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-semibold text-sm">M</span>
+      <div className={`backdrop-blur-sm shadow-lg border-b transition-colors duration-300 ${
+        isDark 
+          ? 'bg-gray-800/80 border-gray-700/50' 
+          : 'bg-white/80 border-white/20'
+      }`}>
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="h-12 w-12 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <HeartIcon className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">Manoday</h1>
-              <p className="text-sm text-gray-500">Your mental wellness companion</p>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent">
+                Manoday
+              </h1>
+              <p className={`text-sm font-medium transition-colors duration-300 ${
+                isDark ? 'text-gray-300' : 'text-gray-600'
+              }`}>Your mental wellness companion</p>
             </div>
           </div>
           
           <div className="flex items-center space-x-4">
-            <div className="text-right">
-              <p className="text-sm font-medium text-gray-900">
-                Welcome, {currentUser?.isAnonymous ? 'Guest' : (currentUser?.displayName || 'Friend')}
-              </p>
-              <p className="text-xs text-gray-500">
-                {currentUser?.isAnonymous ? 'Anonymous & Secure' : 'Secure & Private'}
-              </p>
-            </div>
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
+            {/* Wellness Data Toggle */}
             <button
-              onClick={logout}
-              className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+              onClick={() => setShowWellnessPanel(!showWellnessPanel)}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-colors duration-200 ${
+                isDark 
+                  ? 'bg-purple-900/50 text-purple-300 hover:bg-purple-800/50' 
+                  : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+              }`}
             >
-              Logout
+              <SparklesIcon className="h-4 w-4" />
+              <span className="text-sm font-medium">Insights</span>
             </button>
-          </div>
-        </div>
-      </div>
 
-      {/* Chat Container */}
-      <div className="max-w-4xl mx-auto px-4 py-6">
-        <div className="bg-white rounded-lg shadow-lg h-[600px] flex flex-col">
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                    message.sender === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : message.type === 'recommendation'
-                      ? 'bg-green-50 border border-green-200 text-green-800'
-                      : 'bg-gray-100 text-gray-900'
-                  }`}
-                >
-                  <div className="flex items-start space-x-2">
-                    {message.type === 'recommendation' && (
-                      <LightBulbIcon className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    )}
-                    <div className="flex-1">
-                      <p className="text-sm whitespace-pre-wrap">{message.text}</p>
-                      {message.metadata?.recommendation && (
-                        <div className="mt-2 p-2 bg-green-100 rounded border border-green-200">
-                          <p className="text-xs font-medium text-green-800">
-                            💡 Recommended Activity: {message.metadata.recommendation}
-                          </p>
-                          <button 
-                            className="mt-2 w-full px-3 py-2 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-700 transition-colors"
-                            onClick={() => {
-                              // TODO: Navigate to new route when implemented
-                              console.log(`Navigate to activity: ${message.metadata?.recommendation}`);
-                            }}
-                          >
-                            {message.metadata?.recommendation}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <p className={`text-xs mt-1 ${
-                    message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
-                  }`}>
-                    {message.timestamp.toLocaleTimeString([], { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    })}
-                  </p>
-                </div>
-              </div>
-            ))}
-            
-            {isTyping && (
-              <div className="flex justify-start">
-                <div className="bg-gray-100 text-gray-900 px-4 py-2 rounded-lg">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input */}
-          <div className="border-t border-gray-200 p-4">
-            <div className="flex space-x-4">
-              <div className="flex-1">
-                <textarea
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Share how you're feeling..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                  rows={2}
-                  disabled={isTyping}
-                />
+            {/* User Info */}
+            <div className="flex items-center space-x-3">
+              <div className="text-right">
+                <p className={`text-sm font-semibold transition-colors duration-300 ${
+                  isDark ? 'text-gray-200' : 'text-gray-900'
+                }`}>
+                  {currentUser?.isAnonymous ? 'Guest User' : (currentUser?.displayName || 'Friend')}
+                </p>
+                <p className={`text-xs flex items-center transition-colors duration-300 ${
+                  isDark ? 'text-gray-400' : 'text-gray-500'
+                }`}>
+                  <ShieldCheckIcon className="h-3 w-3 mr-1" />
+                  {currentUser?.isAnonymous ? 'Anonymous & Secure' : 'Secure & Private'}
+                </p>
               </div>
               <button
-                onClick={handleSendMessage}
-                disabled={!inputMessage.trim() || isTyping}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                onClick={logout}
+                className={`px-4 py-2 text-sm font-medium rounded-xl transition-colors duration-200 ${
+                  isDark 
+                    ? 'text-gray-300 hover:text-gray-100 hover:bg-gray-700' 
+                    : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                }`}
               >
-                <PaperAirplaneIcon className="h-5 w-5" />
-                <span>Send</span>
+                Logout
               </button>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Wellness Data Display */}
-        {Object.keys(wellnessData).length > 0 && (
-          <div className="mt-6">
-            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-              <h3 className="text-sm font-medium text-blue-800 mb-2 flex items-center">
-                <HeartIcon className="h-4 w-4 mr-2" />
-                Wellness Insights
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-                {Object.entries(wellnessData).map(([key, value]) => (
-                  <div key={key} className="bg-white p-2 rounded border">
-                    <span className="font-medium text-blue-700">{key}:</span>
-                    <span className="text-blue-600 ml-1">{value}</span>
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          
+          {/* Chat Container */}
+          <div className="lg:col-span-3">
+            <div className={`backdrop-blur-sm rounded-2xl shadow-xl border transition-colors duration-300 h-[700px] flex flex-col ${
+              isDark 
+                ? 'bg-gray-800/80 border-gray-700/50' 
+                : 'bg-white/80 border-white/20'
+            }`}>
+              
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-xs lg:max-w-md px-6 py-4 rounded-2xl shadow-sm ${
+                        message.sender === 'user'
+                          ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
+                          : message.type === 'recommendation'
+                          ? 'bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 text-green-800 dark:from-green-900/50 dark:to-emerald-900/50 dark:border-green-700/50 dark:text-green-200'
+                          : isDark
+                          ? 'bg-gray-700 border-gray-600 text-gray-200 shadow-md'
+                          : 'bg-white border border-gray-100 text-gray-900 shadow-md'
+                      }`}
+                    >
+                      <div className="flex items-start space-x-3">
+                        {message.type === 'recommendation' && (
+                          <LightBulbIcon className="h-5 w-5 text-green-600 mt-1 flex-shrink-0" />
+                        )}
+                        {message.sender === 'bot' && message.type !== 'recommendation' && (
+                          <div className="h-8 w-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <ChatBubbleLeftRightIcon className="h-4 w-4 text-white" />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.text}</p>
+                          {message.metadata?.recommendation && (
+                            <div className={`mt-3 p-3 rounded-xl border transition-colors duration-300 ${
+                              isDark 
+                                ? 'bg-green-900/50 border-green-700/50' 
+                                : 'bg-green-100 border-green-200'
+                            }`}>
+                              <p className={`text-xs font-semibold mb-2 transition-colors duration-300 ${
+                                isDark ? 'text-green-200' : 'text-green-800'
+                              }`}>
+                                💡 Recommended Activity: {message.metadata.recommendation}
+                              </p>
+                              <button 
+                                className="w-full px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-xs font-semibold rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 transform hover:scale-[1.02]"
+                                onClick={() => {
+                                  // TODO: Navigate to new route when implemented
+                                  console.log(`Navigate to activity: ${message.metadata?.recommendation}`);
+                                }}
+                              >
+                                Try {message.metadata?.recommendation}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <p className={`text-xs mt-2 transition-colors duration-300 ${
+                        message.sender === 'user' ? 'text-purple-100' : isDark ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
+                        {message.timestamp.toLocaleTimeString([], { 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })}
+                      </p>
+                    </div>
                   </div>
                 ))}
+                
+                {isTyping && (
+                  <div className="flex justify-start">
+                    <div className={`border text-gray-900 px-6 py-4 rounded-2xl shadow-md transition-colors duration-300 ${
+                      isDark 
+                        ? 'bg-gray-700 border-gray-600 text-gray-200' 
+                        : 'bg-white border-gray-100'
+                    }`}>
+                      <div className="flex items-center space-x-2">
+                        <div className="h-8 w-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                          <ChatBubbleLeftRightIcon className="h-4 w-4 text-white" />
+                        </div>
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Input */}
+              <div className={`border-t p-6 transition-colors duration-300 ${
+                isDark ? 'border-gray-700' : 'border-gray-100'
+              }`}>
+                <div className="flex space-x-4">
+                  <div className="flex-1">
+                    <textarea
+                      value={inputMessage}
+                      onChange={(e) => setInputMessage(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Share how you're feeling..."
+                      className={`w-full px-6 py-4 border rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none shadow-sm transition-colors duration-300 ${
+                        isDark 
+                          ? 'bg-gray-700/80 border-gray-600 text-gray-200 placeholder-gray-400' 
+                          : 'bg-white/80 border-gray-200'
+                      }`}
+                      rows={2}
+                      disabled={isTyping}
+                    />
+                  </div>
+                  <button
+                    onClick={handleSendMessage}
+                    disabled={!inputMessage.trim() || isTyping}
+                    className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] flex items-center space-x-2 shadow-lg"
+                  >
+                    <PaperAirplaneIcon className="h-5 w-5" />
+                    <span className="font-semibold">Send</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        )}
 
-        {/* Privacy Notice */}
-        <div className="mt-6 text-center">
-          <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-            <h3 className="text-sm font-medium text-blue-800 mb-2">
-              🔒 Your Privacy is Protected
-            </h3>
-            <p className="text-xs text-blue-700">
-              All conversations are encrypted and anonymous. Your personal information is never stored or shared.
-            </p>
+          {/* Wellness Insights Panel */}
+          <div className="lg:col-span-1">
+            <div className={`backdrop-blur-sm rounded-2xl shadow-xl border p-6 transition-all duration-300 ${
+              showWellnessPanel ? 'block' : 'hidden lg:block'
+            } ${
+              isDark 
+                ? 'bg-gray-800/80 border-gray-700/50' 
+                : 'bg-white/80 border-white/20'
+            }`}>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className={`text-lg font-semibold flex items-center transition-colors duration-300 ${
+                  isDark ? 'text-gray-200' : 'text-gray-800'
+                }`}>
+                  <SparklesIcon className="h-5 w-5 mr-2 text-purple-600" />
+                  Wellness Insights
+                </h3>
+                <button
+                  onClick={() => setShowWellnessPanel(false)}
+                  className="lg:hidden p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <XMarkIcon className="h-5 w-5 text-gray-500" />
+                </button>
+              </div>
+
+              {Object.keys(wellnessData).length > 0 ? (
+                <div className="space-y-4">
+                  {Object.entries(wellnessData).map(([key, value]) => (
+                    <div className={`p-4 rounded-xl border transition-colors duration-300 ${
+                      isDark 
+                        ? 'bg-gradient-to-r from-purple-900/50 to-pink-900/50 border-purple-700/50' 
+                        : 'bg-gradient-to-r from-purple-50 to-pink-50 border-purple-100'
+                    }`}>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-sm font-medium capitalize transition-colors duration-300 ${
+                          isDark ? 'text-purple-200' : 'text-purple-800'
+                        }`}>
+                          {key.replace(/([A-Z])/g, ' $1').trim()}
+                        </span>
+                        <span className={`text-sm font-semibold px-2 py-1 rounded-lg transition-colors duration-300 ${
+                          isDark 
+                            ? 'text-purple-200 bg-gray-700' 
+                            : 'text-purple-600 bg-white'
+                        }`}>
+                          {value}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <HeartIcon className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <p className={`text-sm transition-colors duration-300 ${
+                    isDark ? 'text-gray-400' : 'text-gray-500'
+                  }`}>
+                    Start chatting to see your wellness insights
+                  </p>
+                </div>
+              )}
+
+              {/* Privacy Notice */}
+              <div className={`mt-6 p-4 rounded-xl border transition-colors duration-300 ${
+                isDark 
+                  ? 'bg-blue-900/50 border-blue-700/50' 
+                  : 'bg-blue-50 border-blue-100'
+              }`}>
+                <h4 className={`text-sm font-semibold mb-2 flex items-center transition-colors duration-300 ${
+                  isDark ? 'text-blue-200' : 'text-blue-800'
+                }`}>
+                  <ShieldCheckIcon className="h-4 w-4 mr-2" />
+                  Privacy Protected
+                </h4>
+                <p className={`text-xs transition-colors duration-300 ${
+                  isDark ? 'text-blue-300' : 'text-blue-700'
+                }`}>
+                  All conversations are encrypted and anonymous. Your personal information is never stored or shared.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

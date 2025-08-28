@@ -3,6 +3,7 @@ import { onRequest } from "firebase-functions/https";
 import * as logger from "firebase-functions/logger";
 import { GeminiController } from './controllers/gemini.controller';
 import { AutoMLController } from './controllers/automl.controller';
+import { validateConfig } from './config';
 
 // Set global options for Firebase Functions
 setGlobalOptions({ maxInstances: 10 });
@@ -11,12 +12,8 @@ setGlobalOptions({ maxInstances: 10 });
 const geminiController = new GeminiController();
 const automlController = new AutoMLController();
 
-// Debug: Check if configuration is loaded
-console.log('🔍 Configuration check:');
-console.log('✅ Firebase Admin SDK: Initialized via config.ts');
-console.log('✅ Gemini: Configured via config.ts');
-console.log('✅ AutoML: Configured via config.ts');
-console.log('✅ Authentication: Configured via config.ts');
+// Validate configuration on startup
+validateConfig();
 
 // Gemini endpoint
 export const gemini = onRequest(async (request, response) => {

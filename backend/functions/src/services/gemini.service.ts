@@ -8,46 +8,61 @@ export class GeminiService {
       const GEMINI_API_KEY = config.gemini.apiKey;
       const GEMINI_ENDPOINT = config.gemini.endpoint;
       
+      // Debug configuration
+      logger.info('🔍 Gemini Configuration Debug:', {
+        apiKey: GEMINI_API_KEY ? '✅ Set' : '❌ Missing',
+        endpoint: GEMINI_ENDPOINT,
+        apiKeyLength: GEMINI_API_KEY?.length || 0
+      });
+      
       const prompt = this.createEmpatheticPrompt(request.message, request.conversationHistory, request.wellnessData);
       
       logger.info('Sending prompt to Gemini:', { prompt: prompt.substring(0, 500) + '...' });
       
+      const requestBody = {
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1024,
+        },
+        safetySettings: [
+          {
+            category: "HARM_CATEGORY_HARASSMENT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_HATE_SPEECH",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          }
+        ]
+      };
+
+      logger.info('🌐 Making Gemini API request:', {
+        url: `${GEMINI_ENDPOINT}?key=${GEMINI_API_KEY.substring(0, 10)}...`,
+        method: 'POST',
+        bodySize: JSON.stringify(requestBody).length
+      });
+
       const response = await fetch(`${GEMINI_ENDPOINT}?key=${GEMINI_API_KEY}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 1024,
-          },
-          safetySettings: [
-            {
-              category: "HARM_CATEGORY_HARASSMENT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
-            },
-            {
-              category: "HARM_CATEGORY_HATE_SPEECH",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
-            },
-            {
-              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
-            },
-            {
-              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
-            }
-          ]
-        })
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
