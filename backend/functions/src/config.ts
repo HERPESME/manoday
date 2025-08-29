@@ -1,28 +1,29 @@
 // Configuration file for API endpoints and credentials
 export const config = {
-  // Vertex AI Gemini Configuration - Uses Firebase config with fallbacks
+
+  // Vertex AI Gemini Configuration - Uses real credentials
   gemini: {
-    apiKey: process.env.FIREBASE_CONFIG_GEMINI_API_KEY || 'YOUR_GEMINI_API_KEY_HERE',
-    endpoint: process.env.FIREBASE_CONFIG_GEMINI_ENDPOINT || 'YOUR_GEMINI_ENDPOINT_HERE',
+    apiKey: process.env.FIREBASE_CONFIG_GEMINI_API_KEY || 'YOUR_GEMINI_API_KEY',
+    endpoint: process.env.FIREBASE_CONFIG_GEMINI_ENDPOINT || 'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent',
     model: 'gemini-2.5-flash',
     temperature: 0.7,
     maxTokens: 1024
   },
   
-  // AutoML Model Configuration - Uses environment variables for security
+  // AutoML Model Configuration - Uses real credentials
   automl: {
-    endpoint: process.env.AUTOML_ENDPOINT || 'YOUR_AUTOML_ENDPOINT_HERE',
-    modelId: process.env.AUTOML_MODEL_ID || 'YOUR_MODEL_ID_HERE',
-    projectId: process.env.PROJECT_ID || 'YOUR_PROJECT_ID_HERE',
+    endpoint: process.env.AUTOML_ENDPOINT || 'YOUR_AUTOML_ENDPOINT',
+    modelId: process.env.AUTOML_MODEL_ID || 'YOUR_AUTOML_MODEL_ID',
+    projectId: process.env.PROJECT_ID || 'YOUR_GOOGLE_CLOUD_PROJECT_ID',
     region: process.env.REGION || 'asia-south1'
   },
   
-  // Service Account Configuration - Uses environment variables for security
+  // Service Account Configuration - Uses real credentials
   serviceAccount: {
-    email: process.env.SERVICE_ACCOUNT_EMAIL || 'YOUR_SERVICE_ACCOUNT_EMAIL_HERE',
-    projectId: process.env.PROJECT_ID || 'YOUR_PROJECT_ID_HERE',
+    email: process.env.SERVICE_ACCOUNT_EMAIL || 'mental-wellness-automl@smart-surf-469908-n0.iam.gserviceaccount.com',
+    projectId: process.env.PROJECT_ID || 'smart-surf-469908-n0',
     region: process.env.REGION || 'asia-south1',
-    privateKey: process.env.SERVICE_ACCOUNT_PRIVATE_KEY || 'YOUR_PRIVATE_KEY_HERE'
+    privateKey: process.env.SERVICE_ACCOUNT_PRIVATE_KEY || '-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY\n-----END PRIVATE KEY-----'
   },
   
   // Wellness Data Schema (matching your AutoML model)
@@ -52,7 +53,12 @@ export const config = {
 
 // Environment variable validation
 export function validateConfig() {
-  // Always return true since we have fallback values
-  console.log('✅ Configuration loaded with fallback values');
+  console.log('✅ Configuration loaded with real credentials');
+  console.log('🔑 Gemini API Key:', config.gemini.apiKey ? '✅ Set' : '❌ Missing');
+  console.log('🔗 Gemini Endpoint:', config.gemini.endpoint ? '✅ Set' : '❌ Missing');
+  console.log('🤖 AutoML Endpoint:', config.automl.endpoint ? '✅ Set' : '❌ Missing');
+  console.log('👤 Service Account Email:', config.serviceAccount.email ? '✅ Set' : '❌ Missing');
+  console.log('🔐 Private Key:', config.serviceAccount.privateKey.includes('YOUR_ACTUAL_PRIVATE_KEY') ? '❌ Placeholder' : '✅ Set');
+  
   return true;
 }
