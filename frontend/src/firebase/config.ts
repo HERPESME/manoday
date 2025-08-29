@@ -6,13 +6,13 @@ import { getFirestore } from 'firebase/firestore';
 // These values come from environment variables for security
 // Copy this file to config.ts and replace with your actual values
 const firebaseConfig = {
-  apiKey: "AIzaSyDX0jcHEdUypuSrVLHyJLUK64YX3j71UwE",
-  authDomain: "smart-surf-469908-n0.firebaseapp.com",
-  projectId: "smart-surf-469908-n0",
-  storageBucket: "smart-surf-469908-n0.firebasestorage.app",
-  messagingSenderId: "118966222674",
-  appId: "1:118966222674:web:a03df61cf313141d07448b",
-  measurementId: "G-DQEVEJ9G3D"
+  apiKey: "your-actual-api-key",
+  authDomain: "your-project.firebaseapp.com",
+  projectId: "your-project-id",
+  storageBucket: "your-project.firebasestorage.app",
+  messagingSenderId: "your-sender-id",
+  appId: "your-app-id",
+  measurementId: "your-measurement-id"
 };
 
 // Initialize Firebase

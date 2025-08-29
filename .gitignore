@@ -118,3 +118,11 @@ temp/
 
 # Local development
 .local
+
+# Project-specific ignores (appended)
+frontend/.env
+backend/functions/.env
+frontend/build/
+backend/functions/lib/
+reactSetup/node_modules/
+reactSetup/dist/
