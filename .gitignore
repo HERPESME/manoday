@@ -1,26 +1,30 @@
 node_modules
-\n+# macOS
+
+# macOS
 .DS_Store
-\n+# Env files
+
+# Env files
 .env
 .env.*
 !.env.example
-\n+# Firebase local state and logs
+
+# Firebase local state and logs
 .firebase/
 firebase-debug.log
-\n+# Frontend build output
+
+# Frontend build output
 frontend/build/
-\n+# Firebase config in frontend (keep example only)
-frontend/src/firebase/config.ts
-!frontend/src/firebase/config.example.ts
-\n+# Service account keys (never commit)
+
+# Service account keys (never commit)
 **/serviceAccount*.json
 **/*-firebase-adminsdk-*.json
-\n+# Functions env files (keep example only)
+
+# Functions env files (keep example only)
 backend/functions/.env
 backend/functions/.env.*
 !backend/functions/env.example
-\n+# Logs
+
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
